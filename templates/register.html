@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Create Account</h2>
+        <form method="POST" id="registerForm" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" required placeholder="John Doe" maxlength="100">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" required placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input type="tel" name="mobile" required placeholder="10-digit mobile" pattern="[0-9]{10}">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" id="password" required placeholder="Min 8 chars">
+                <ul class="password-rules" id="pwRules">
+                    <li id="r-len">At least 8 characters</li>
+                    <li id="r-upper">One uppercase letter</li>
+                    <li id="r-lower">One lowercase letter</li>
+                    <li id="r-num">One number</li>
+                    <li id="r-sym">One special character</li>
+                </ul>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" id="confirmPassword" required placeholder="Repeat password">
+                <span class="field-error" id="matchError"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Register &amp; Send OTP</button>
+        </form>
+        <p class="auth-link">Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+    </div>
+</div>
+{% endblock %}

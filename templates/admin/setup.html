@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Admin Setup{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card admin-card">
+        <h2>Create Admin Account</h2>
+        <p style="color:#e74c3c;font-size:.85rem">⚠️ Remove this route after setup!</p>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-danger">Create Admin</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

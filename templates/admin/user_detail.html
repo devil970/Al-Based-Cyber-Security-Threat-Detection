@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}User Detail — {{ user.name }}{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <header class="dash-header">
+        <h1>User: {{ user.name }}</h1>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">← Back</a>
+        <form method="POST" action="{{ url_for('admin_delete', user_id=user.id) }}"
+              onsubmit="return confirm('Permanently DELETE this user? This cannot be undone.')" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn" style="background:#111;color:#fff">Delete User</button>
+        </form>
+    </header>
+
+    <div class="user-info-grid">
+        <div class="info-item"><span>Email</span><strong>{{ user.email }}</strong></div>
+        <div class="info-item"><span>Mobile</span><strong>{{ user.mobile }}</strong></div>
+        <div class="info-item"><span>Status</span>
+            <strong><span class="badge badge-{{ user.status }}">{{ user.status }}</span></strong>
+        </div>
+        <div class="info-item"><span>Failed Attempts</span><strong>{{ user.failed_attempts }}</strong></div>
+        <div class="info-item"><span>Email Verified</span><strong>{{ '✅' if user.email_verified else '❌' }}</strong></div>
+        <div class="info-item"><span>Mobile Verified</span><strong>{{ '✅' if user.mobile_verified else '❌' }}</strong></div>
+        <div class="info-item"><span>Registered</span><strong>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</strong></div>
+    </div>
+
+    {% if user_reqs %}
+    <h3 style="margin:1.5rem 0 0.75rem">Change Requests</h3>
+    <div class="table-wrapper" style="margin-bottom:1.5rem">
+        <table class="data-table">
+            <thead>
+                <tr><th>Type</th><th>Requested Value</th><th>Status</th><th>Date</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for r in user_reqs %}
+                <tr>
+                    <td>{{ 'Change Password' if r.request_type == 'change_password' else 'Change Email' }}</td>
+                    <td>{{ r.new_value }}</td>
+                    <td><span class="badge {{ 'badge-success' if r.status == 'done' else 'badge-locked' }}">{{ r.status }}</span></td>
+                    <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        {% if r.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('admin_action_request', req_id=r.id) }}" style="display:inline"
+                              onsubmit="return confirm('Apply this change to the user?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-success">Apply</button>
+                        </form>
+                        {% else %}
+                        <span style="color:var(--muted);font-size:.8rem">Done</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <h3 style="margin:1.5rem 0 0.75rem">Login History (last 50)</h3>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Login Time</th>
+                    <th>Logout Time</th>
+                    <th>IP Address</th>
+                    <th>Status</th>
+                    <th>Duration (s)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.login_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ log.logout_time.strftime('%Y-%m-%d %H:%M:%S') if log.logout_time else '—' }}</td>
+                    <td>{{ log.ip_address }}</td>
+                    <td><span class="badge badge-{{ log.status }}">{{ log.status }}</span></td>
+                    <td>{{ log.session_duration if log.session_duration else '—' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="empty">No login history.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

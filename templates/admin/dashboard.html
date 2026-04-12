@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="admin-container">
+    <header class="dash-header">
+        <h1>Admin Dashboard</h1>
+        <a href="{{ url_for('admin_logout') }}" class="btn btn-outline">Logout</a>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stat">
+            <span class="stat-num">{{ users | length }}</span>
+            <span class="stat-label">Total Users</span>
+        </div>
+        <div class="stat">
+            <span class="stat-num">{{ users | selectattr('status','eq','locked') | list | length }}</span>
+            <span class="stat-label">Locked</span>
+        </div>
+        <div class="stat">
+            <span class="stat-num">{{ users | selectattr('status','eq','restricted') | list | length }}</span>
+            <span class="stat-label">Restricted</span>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Mobile</th>
+                    <th>Status</th>
+                    <th>Failed Attempts</th>
+                    <th>Total Logins</th>
+                    <th>Last Login</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><a href="{{ url_for('admin_user_detail', user_id=u.id) }}">{{ u.name }}</a></td>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.mobile }}</td>
+                    <td><span class="badge badge-{{ u.status }}">{{ u.status }}</span></td>
+                    <td>{{ u.failed_attempts }}</td>
+                    <td>{{ u.total_logins }}</td>
+                    <td>{{ u.last_login.strftime('%Y-%m-%d %H:%M') if u.last_login else '—' }}</td>
+                    <td class="action-btns">
+                        {% if u.status == 'locked' %}
+                        <form method="POST" action="{{ url_for('admin_unlock', user_id=u.id) }}" style="display:inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-success">Unlock</button>
+                        </form>
+                        {% endif %}
+                        {% if u.status != 'restricted' %}
+                        <form method="POST" action="{{ url_for('admin_restrict', user_id=u.id) }}" style="display:inline"
+                              onsubmit="return confirm('Permanently restrict this user?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-danger">Restrict</button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('admin_delete', user_id=u.id) }}" style="display:inline"
+                              onsubmit="return confirm('Permanently DELETE this user? This cannot be undone.')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-outline" style="color:var(--danger);border-color:var(--danger)">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="9" class="empty">No users registered yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

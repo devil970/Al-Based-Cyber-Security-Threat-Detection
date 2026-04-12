@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Admin OTP Verification{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card admin-card">
+        <div class="admin-badge">🔐 Admin Portal</div>
+        <h2>OTP Verification</h2>
+        <p class="admin-subtitle">
+            A 6-digit OTP has been sent to <strong>{{ email }}</strong>.<br>
+            It expires in {{ otp_expiry }} minutes.
+        </p>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Enter OTP</label>
+                <input type="text" name="otp" required maxlength="6" pattern="[0-9]{6}"
+                       placeholder="6-digit OTP" autofocus autocomplete="one-time-code">
+            </div>
+            <button type="submit" class="btn btn-danger">Verify & Login</button>
+        </form>
+        <p class="auth-link">
+            Didn't receive it? <a href="{{ url_for('admin_resend_otp') }}">Resend OTP</a>
+        </p>
+    </div>
+</div>
+
+<style>
+.admin-badge {
+    display: inline-block;
+    background: #fee2e2;
+    color: #7f1d1d;
+    font-size: .78rem;
+    font-weight: 700;
+    padding: .3rem .8rem;
+    border-radius: 20px;
+    margin-bottom: .75rem;
+    letter-spacing: .05em;
+}
+.admin-subtitle {
+    font-size: .85rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+</style>
+{% endblock %}

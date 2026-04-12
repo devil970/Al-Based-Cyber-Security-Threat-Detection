@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+    <header class="dash-header">
+        <h1>Welcome, {{ name }} <span class="badge badge-active">ACTIVE SECURE</span></h1>
+        <div style="display:flex;gap:.75rem">
+            <button class="btn btn-primary" onclick="document.getElementById('reqModal').style.display='flex'">📋 Request Upgrade</button>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline">System Disconnect</a>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        <!-- Left Column: Profile & Identification -->
+        <div class="profile-side">
+            <div class="info-card" style="margin-bottom: 2rem;">
+                <img src="{{ url_for('static', filename='avatar.png') }}" alt="User Avatar" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary); box-shadow: 0 0 20px var(--primary-glow); margin-bottom: 1.5rem; animation: pulse 2s infinite alternate;">
+                <h3>{{ user.name }}</h3>
+                <p>ID: #{{ "%04d" | format(user.id) }}</p>
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); text-align: left;">
+                    <div style="margin-bottom: 0.8rem;">
+                        <span style="display:block; font-family:'Share Tech Mono'; color:var(--muted); font-size: 0.8rem;">Comm Link 1:</span>
+                        <strong style="color:#fff;">{{ user.email }}</strong>
+                    </div>
+                    <div>
+                        <span style="display:block; font-family:'Share Tech Mono'; color:var(--muted); font-size: 0.8rem;">Comm Link 2:</span>
+                        <strong style="color:#fff;">{{ user.mobile }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card" style="padding: 1.5rem; text-align: left;">
+                <h4 style="margin-bottom: 1rem; color: var(--primary); font-family: 'Share Tech Mono';">SECURITY STATUS</h4>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.8rem;">
+                    <div style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success);"></div>
+                    <span style="font-size: 0.9rem;">Multi-Factor Auth: <strong>Enabled</strong></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 10px; height: 10px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary);"></div>
+                    <span style="font-size: 0.9rem;">Network Crypto: <strong>Active</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Stats & Logs -->
+        <div class="stats-side">
+            
+            <div class="stats-bar">
+                <div class="stat">
+                    <span class="stat-num">{{ total_logins }}</span>
+                    <span class="stat-label">Successful Entries</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-num">{{ failed_logins }}</span>
+                    <span class="stat-label">Intrusion Attempts</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-num">{{ avg_session }}<span style="font-size:1rem;">s</span></span>
+                    <span class="stat-label">Avg Session Time</span>
+                </div>
+            </div>
+
+            <!-- Recent Activity Table -->
+            <div class="table-section">
+                <h3>System Access Logs</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>IP Route</th>
+                                <th>Status</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td>{{ log.login_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>{{ log.ip_address }}</td>
+                                <td><span class="badge {{ 'badge-success' if log.status == 'success' else 'badge-failed' }}">{{ log.status }}</span></td>
+                                <td>{{ log.session_duration ~ 's' if log.session_duration else 'Active' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="empty">No access records found in system core.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Requests Table -->
+            {% if requests %}
+            <div class="table-section" style="margin-top: 2rem;">
+                <h3>Pending System Requests</h3>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Protocol</th>
+                                <th>Target Override</th>
+                                <th>Override Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in requests %}
+                            <tr>
+                                <td>{{ 'Crytpo Key Reset' if r.request_type == 'change_password' else 'Comms Handshake Sync' }}</td>
+                                <td>{{ r.new_value[:4] + '****' if r.request_type == 'change_password' else r.new_value }}</td>
+                                <td><span class="badge {{ 'badge-success' if r.status == 'done' else 'badge-locked' }}">{{ r.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0% { border-color: rgba(0,243,255,0.5); box-shadow: 0 0 10px rgba(0,243,255,0.2); }
+    100% { border-color: rgba(0,243,255,1); box-shadow: 0 0 30px rgba(0,243,255,0.6); }
+}
+</style>
+
+<!-- Request Modal -->
+<div id="reqModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(5px);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--card-bg);border:1px solid var(--border);backdrop-filter:var(--glass-blur);box-shadow:0 0 20px rgba(0,243,255,0.1);border-radius:var(--radius);padding:2rem;width:100%;max-width:420px;position:relative">
+        <button onclick="document.getElementById('reqModal').style.display='none'"
+                style="position:absolute;top:.75rem;right:1rem;background:none;border:none;font-size:1.25rem;color:var(--danger);text-shadow:0 0 5px rgba(255,0,60,0.5);cursor:pointer">✕</button>
+        <h2 style="margin-bottom:1.25rem;color:var(--primary)">System Bypass Request</h2>
+        <form method="POST" action="{{ url_for('user_request') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Clearance ID (Name)</label>
+                <input type="text" name="name" required placeholder="Operative Designation">
+            </div>
+            <div class="form-group">
+                <label>Registered Comm Link</label>
+                <input type="email" name="email" required placeholder="operative@nexus.com">
+            </div>
+            <div class="form-group">
+                <label>Override Directive</label>
+                <select name="request_type" id="reqType" onchange="updateLabel()"
+                        style="width:100%;padding:.65rem .9rem;border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);font-size:.95rem;background:rgba(0,0,0,0.5);color:#fff">
+                    <option value="change_password">Cryptographic Key Reset</option>
+                    <option value="change_email">Comm Link Redirect</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label id="newValueLabel">New Cipher Key</label>
+                <input type="text" name="new_value" id="newValue" required placeholder="Enter new crypto string">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">Transmit Request</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function updateLabel() {
+    const type = document.getElementById('reqType').value;
+    document.getElementById('newValueLabel').textContent = type === 'change_password' ? 'New Cipher Key' : 'Target Comm Link';
+    document.getElementById('newValue').placeholder = type === 'change_password' ? 'Enter new crypto string' : 'Enter standard comm pattern';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Verify Email OTP{% endblock %}
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Verify Email OTP</h2>
+        <p class="otp-info">
+            A 6-digit OTP has been sent to <strong>{{ target }}</strong>.
+            It expires in {{ otp_expiry }} minutes.
+        </p>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Enter OTP</label>
+                <input type="text" name="otp" required maxlength="6" pattern="[0-9]{6}"
+                       placeholder="6-digit OTP" autofocus autocomplete="one-time-code">
+            </div>
+            <button type="submit" class="btn btn-primary">Verify OTP</button>
+        </form>
+        <p class="auth-link">
+            Didn't receive it?
+            <a href="{{ url_for('resend_otp') }}">Resend OTP</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
