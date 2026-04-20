@@ -54,5 +54,6 @@ CREATE TABLE IF NOT EXISTS support_tickets (
 
 
 -- Default admin: username=ADMIN, password=Nehaadmin@123
+-- Password stored as bcrypt hash
 INSERT IGNORE INTO admin (username, password_hash, email)
-VALUES ('ADMIN', 'Nehaadmin@123', 'walkeneha310@gmail.com');
+VALUES ('ADMIN', '$2b$12$/jOuFvssuQ0iKnQChBj9Hev900.EJpgmCdWWTWQouABfWIR7G2BMS', 'walkeneha310@gmail.com');
